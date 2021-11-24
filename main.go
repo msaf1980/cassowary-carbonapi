@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"flag"
 	"log"
 	"math/rand"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	cassowary "github.com/msaf1980/cassowary/pkg/client"
+	flag "github.com/spf13/pflag"
 )
 
 type URLIterator struct {
@@ -58,11 +58,12 @@ func main() {
 	delay := flag.Duration("delay", 100*time.Millisecond, "Delay between requests")
 	duration := flag.Duration("duration", time.Minute, "Duration")
 
-	users_1_hour := flag.Int("users_1_hour", 10, "Users for 1 hour queries")
-	users_1_day := flag.Int("users_1_day", 2, "Users for 1 day queries")
-	users_1_week := flag.Int("users_1_week", 2, "Users for 1 week queries")
-	users_3_month := flag.Int("users_3_month", 1, "Users for 3 months queries")
-	users_1_year := flag.Int("users_1_year", 0, "Users for 1 year queries")
+	render_1_hour := flag.Int("render_1h", 8, "Users for 1 hour render queries")
+	render_1_day := flag.Int("render_1d", 2, "Users for 1 day render queries")
+	render_5_day := flag.Int("render_5d", 2, "Users for 5 days render queries")
+	render_30_day := flag.Int("render_30d", 0, "Users for 30 days render queries")
+	render_90_day := flag.Int("render_90d", 0, "Users for 90 days render queries")
+	render_365_day := flag.Int("render_365d", 0, "Users for 365 days render queries")
 
 	flag.Parse()
 
@@ -83,50 +84,58 @@ func main() {
 
 	targets = targets[1:]
 
-	it_1_hour := NewURLIterator(3600, targets)
-	it_1_day := NewURLIterator(86400, targets)
-	it_1_week := NewURLIterator(604800, targets)
-	it_3_month := NewURLIterator(7776000, targets)
-	it_1_year := NewURLIterator(31536000, targets)
+	it_render_1_hour := NewURLIterator(3600, targets)
+	it_render_1_day := NewURLIterator(86400, targets)
+	it_render_5_day := NewURLIterator(518400, targets)
+	it_render_30_day := NewURLIterator(2592000, targets)
+	it_render_90_day := NewURLIterator(7776000, targets)
+	it_render_365_day := NewURLIterator(31536000, targets)
 
 	cass := &cassowary.Cassowary{
 		BaseURL:  *baseURL,
 		Duration: *duration,
 		Groups: []cassowary.QueryGroup{
 			{
-				Name:             "1 Hour",
-				ConcurrencyLevel: *users_1_hour,
+				Name:             "Render 1 Hour",
+				ConcurrencyLevel: *render_1_hour,
 				Delay:            *delay,
 				FileMode:         true,
-				URLIterator:      it_1_hour,
+				URLIterator:      it_render_1_hour,
 			},
 			{
-				Name:             "1 Day",
-				ConcurrencyLevel: *users_1_day,
+				Name:             "Render 1 Day",
+				ConcurrencyLevel: *render_1_day,
 				Delay:            *delay,
 				FileMode:         true,
-				URLIterator:      it_1_day,
+				URLIterator:      it_render_1_day,
 			},
 			{
-				Name:             "1 Week",
-				ConcurrencyLevel: *users_1_week,
+				Name:             "Render 6 Day",
+				ConcurrencyLevel: *render_5_day,
 				Delay:            *delay,
 				FileMode:         true,
-				URLIterator:      it_1_week,
+				URLIterator:      it_render_5_day,
 			},
 			{
-				Name:             "3 Month",
-				ConcurrencyLevel: *users_3_month,
+				Name:             "Render 30 Day",
+				ConcurrencyLevel: *render_30_day,
 				Delay:            *delay,
 				FileMode:         true,
-				URLIterator:      it_3_month,
+				URLIterator:      it_render_30_day,
 			},
 			{
-				Name:             "1 Year",
-				ConcurrencyLevel: *users_1_year,
+				Name:             "Render 90 Day",
+				ConcurrencyLevel: *render_90_day,
 				Delay:            *delay,
 				FileMode:         true,
-				URLIterator:      it_1_year,
+				URLIterator:      it_render_90_day,
+			},
+			{
+				Name:             "Render 365 Day",
+				ConcurrencyLevel: *render_365_day,
+				Delay:            *delay,
+				FileMode:         true,
+				URLIterator:      it_render_365_day,
 			},
 		},
 		DisableTerminalOutput: false,
